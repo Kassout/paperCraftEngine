@@ -3,7 +3,10 @@
 
 #include <SDL.h>
 
+/// Expected frame per seconds value.
 const int FPS = 60;
+
+/// Computed expected time between two frames for a given number of frame per seconds.
 const int MILLISECS_PER_FRAME = 1000 / FPS;
 
 /// Class responsible for calling all of our game code and keeping the game running.
@@ -13,28 +16,56 @@ const int MILLISECS_PER_FRAME = 1000 / FPS;
 class Game
 {
 private:
+    /// Game running status indicator.
     bool isRunning;
+    /// Time elapsed since last game frame.
     int millisecsPreviousFrame = 0;
+    /// Window object to display render buffers.
     SDL_Window* window;
+    /// Renderer object to draw texture.
     SDL_Renderer* renderer;
 
 public:
-    // Constructor
+    /// Game window width value.
+    int windowWidth;
+    /// Game window height value.
+    int windowHeight;
+
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
     Game();
 
-    // Destructor
+    /// @brief Default destructor
+    /// @details Base destructor of the Game class.
     ~Game();
 
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
     void Initialize();
-    void Run();
-    void Setup();
-    void ProcessInput();
-    void Update();
-    void Render();
-    void Destroy();
 
-    int windowWidth;
-    int windowHeight;
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
+    void Run();
+
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
+    void Setup();
+
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
+    void ProcessInput();
+
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
+    void Update();
+
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
+    void Render();
+
+    /// @brief Default constructor
+    /// @details Base constructor of the Game class.
+    void Destroy();
 };
 
 #endif // GAME_H //
