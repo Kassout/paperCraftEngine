@@ -34,14 +34,19 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
-set(INCLUDES src/Game.h)
+#set(INCLUDES src/Game.h)
 #set(SOURCES src/Main.cpp)
+
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+        )
+
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
         )
 
-add_executable(paperCraftEngine ${INCLUDES} ${SRC_FILES})
+add_executable(paperCraftEngine ${HEADER_FILES} ${SRC_FILES})
 
 include_directories(${SDL2_PATH}/INCLUDE_FILES ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${SDL2_MIXER_INCLUDE_DIR}) #inclusion des dossier nécessaire pour le
 #développement avec SDL2

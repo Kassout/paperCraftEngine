@@ -1,22 +1,22 @@
 #include "Game.h"
+#include "../Logger/Logger.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
-#include <iostream>
 
 Game::Game() {
     isRunning = false;
-    std::cout << "Game constructor called!" << std::endl;
+    Logger::Log("Game constructor called!");
 }
 
 Game::~Game() {
-    std::cout << "Game destructor called!" << std::endl;
+    Logger::Log("Game destructor called!");
 }
 
 void Game::Initialize() {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        std::cerr << "Error initializing SDL." << std::endl;
+        Logger::Err("Error initializing SDL.");
         return;
     }
 
@@ -32,14 +32,14 @@ void Game::Initialize() {
     window = SDL_CreateWindow("Paper Craft Engine",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,SDL_WINDOW_BORDERLESS);
     if (!window)
     {
-        std::cerr << "Error creating SDL window." << std::endl;
+        Logger::Err("Error creating SDL window.");
         return;
     }
 
     renderer = SDL_CreateRenderer(window, -1, 0);
     if (!renderer)
     {
-        std::cerr << "Error creating SDL rederer." << std::endl;
+        Logger::Err("Error creating SDL rederer.");
         return;
     }
 
@@ -69,12 +69,12 @@ void Game::ProcessInput() {
     }
 }
 
-glm::vec2 playerPosition;
-glm::vec2 playerVelocity;
-
 void Game::Setup() {
-    playerPosition = glm::vec2(10.0, 20.0);
-    playerVelocity = glm::vec2(100.0, 0.0);
+    // TODO:
+    // Entity tank = registry.CreateEntity();
+    // tank.AddComponent<TransformComponent>();
+    // tank.AddComponent<BoxColliderComponent>();
+    // tank.AddComponent<SpriteComponent>("../assets/images/tank-tiger-right.png")
 }
 
 void Game::Update() {
@@ -91,21 +91,17 @@ void Game::Update() {
     // Store the current frame time
     millisecsPreviousFrame = SDL_GetTicks();
 
-    playerPosition.x += playerVelocity.x * deltaTime;
-    playerPosition.y += playerVelocity.y * deltaTime;
+    // TODO:
+    // MovementSystem.Update();
+    // CollisionSystem.Update();
+    // DamageSystem.Update();
 }
 
 void Game::Render() {
     SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
     SDL_RenderClear(renderer);
 
-    // Loads a PNG texture
-    SDL_Texture* texture = IMG_LoadTexture(renderer, "../assets/images/tank-tiger-right.png");
-
-    // What is the destination rectangle that we want to place our texture
-    SDL_Rect dstRect = { static_cast<int>(playerPosition.x), static_cast<int>(playerPosition.y), 32, 32 };
-    SDL_RenderCopy(renderer, texture, NULL, &dstRect);
-    SDL_DestroyTexture(texture);
+    // TODO: Render game objects...
 
     SDL_RenderPresent(renderer);
 }

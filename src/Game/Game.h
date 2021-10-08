@@ -13,8 +13,7 @@ const int MILLISECS_PER_FRAME = 1000 / FPS;
 /// @file Game.h
 /// @author Maxime Héliot
 /// @version 0.1.0 07/10/2021
-class Game
-{
+class Game {
 private:
     /// Game running status indicator.
     bool isRunning;
