@@ -71,6 +71,13 @@ public:
 
     /// @brief Unequal comparison operator overloading
     bool operator != (const Entity& other) const { return id != other.id; }
+
+    /// @brief Greater than comparison operator overloading
+    bool operator > (const Entity& other) const { return id > other.id; }
+
+    /// @brief Less than comparison operator overloading
+    bool operator < (const Entity& other) const { return id < other.id; }
+
 };
 
 /// Class responsible for processes entities that contain a specific components signature.
