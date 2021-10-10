@@ -35,5 +35,4 @@ public:
     static void Err(const std::string& message);
 };
 
-
 #endif // LOGGER_H //
