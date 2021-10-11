@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <SDL.h>
+#include "../ECS/ECS.h"
 
 /// Expected frame per seconds value.
 const int FPS = 60;
@@ -23,6 +24,8 @@ private:
     SDL_Window* window;
     /// Renderer object to draw texture.
     SDL_Renderer* renderer;
+    ///
+    std::unique_ptr<Registry> registry; // Registry* registry smart pointer
 
 public:
     /// Game window width value.

@@ -46,6 +46,7 @@ Entity Registry::CreateEntity() {
         entityComponentSignatures.resize(entityId + 1);
     }
     Entity entity(entityId);
+    entity.registry = this;
     entitiesToBeAdded.insert(entity);
 
     Logger::Log("Entity created with id = " + std::to_string(entityId));
@@ -72,9 +73,11 @@ void Registry::AddEntityToSystems(Entity entity) {
 }
 
 void Registry::Update() {
-    // Here is where we actually insert/delete the entities that are waiting to be added/removed
-    // We do this because we don't want to confuse our Systems by adding/removing entities in the middle
-    // of the frame logic. Therefore, we wait until the end of the frame to update and perform
+    // Add the entities that are waiting to be created to the active Systems
+    for (auto entity : entitiesToBeAdded){
+        AddEntityToSystems(entity);
+    }
+    entitiesToBeAdded.clear();
 
-    // TODO: Add the entities that are waiting to be created to the
+    // TODO: Remove the entities that are waiting to be killed from the active scene
 }

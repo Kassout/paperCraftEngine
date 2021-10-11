@@ -1,11 +1,12 @@
 #ifndef ECS_H
 #define ECS_H
 
-#include <bitset>
+#include "../Logger/Logger.h"
 #include <vector>
+#include <bitset>
+#include <set>
 #include <unordered_map>
 #include <typeindex>
-#include <set>
 #include <memory>
 
 /// Integer value representing the maximum number of components allowed to be setup in an entity.
@@ -48,6 +49,9 @@ private:
     int id;
 
 public:
+    /// Pointer to the registry of the game, owner of the entity.
+    class Registry* registry;
+
     /// @brief Entity constructor
     /// @details A constructor of the Entity class using an id value parameter.
     /// @param id: An Integer value representing the id of the Entity to instantiate.
@@ -63,21 +67,39 @@ public:
     /// @return Integer value representing the Entity object id.
     int GetId() const;
 
+    /// @brief Add component to entity method
+    /// @details This method is responsible to add a new component to the entity and it components pool.
+    /// @param args: The arguments of the Component type class.
+    template <typename TComponent, typename ...TArgs>
+    void AddComponent(TArgs&& ...args);
+
+    /// @brief Remove component from entity method
+    /// @details This method is responsible to remove a component from the entity and it components pool.
+    template<typename TComponent>
+    void RemoveComponent();
+
+    /// @brief Check component attendance in entity method
+    /// @details This method is responsible for checking the attendance of a component type inside the entity.
+    /// @return A boolean value representing the attendance status of the component type inside the entity.
+    template<typename TComponent>
+    bool HasComponent() const;
+
+    /// @brief Component getter method
+    /// @details This method is responsible to get the given component type from the entity components list.
+    /// @return The instance of the found component type class.
+    template<typename TComponent>
+    TComponent& GetComponent() const;
+
     /// @brief Assignment operator overloading
     Entity& operator = (const Entity& other) = default;
-
     /// @brief Equal comparison operator overloading
     bool operator == (const Entity& other) const { return id == other.id; }
-
     /// @brief Unequal comparison operator overloading
     bool operator != (const Entity& other) const { return id != other.id; }
-
     /// @brief Greater than comparison operator overloading
     bool operator > (const Entity& other) const { return id > other.id; }
-
     /// @brief Less than comparison operator overloading
     bool operator < (const Entity& other) const { return id < other.id; }
-
 };
 
 /// Class responsible for processes entities that contain a specific components signature.
@@ -88,7 +110,6 @@ class System {
 private:
     /// Signature object representing a bitset of components our entities is required to have for the system to consider them.
     Signature componentSignature;
-
     /// Vector object representing the list of entities the system is interested in process.
     std::vector<Entity> entities;
 
@@ -135,7 +156,7 @@ class IPool {
 public:
     /// @brief Default destructor
     /// @details A default destructor of the IPool class.
-    virtual ~IPool();
+    virtual ~IPool() {}
 };
 
 /// Class responsible for containing objects of type T.
@@ -218,25 +239,20 @@ class Registry {
 private:
     /// Integer value representing the number of entity added to the scene.
     int numEntities = 0;
-
     /// Set of entity objects awaiting creation in the next Registry update cycle.
     std::set<Entity> entitiesToBeAdded;
-
     /// Set of entity objects awaiting destruction in the next Registry update cycle.
     std::set<Entity> entitiesToBeKilled;
-
     /// Vector of component pools. Each pool contains all the data for a certain component type.
     /// @details componentPools[index = component type id]
     /// @details poolObject[index = entity id]
-    std::vector<IPool*> componentPools;
-
+    std::vector<std::shared_ptr<IPool>> componentPools;
     /// Vector of component signatures per entity, saying which component is turned "on" for a given entity.
     /// @details entityComponentSignatures[index = entity id]
     std::vector<Signature> entityComponentSignatures;
-
     /// Unordered map of active systems.
     /// @details systems[index = system typeid]
-    std::unordered_map<std::type_index, System*> systems;
+    std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
 
 public:
     /// @brief Default constructor
@@ -251,26 +267,6 @@ public:
     /// @details This method is responsible to create a new entity, giving it a new unique id and adding to entities list of the system.
     /// @return The Entity object created by the system.
     Entity CreateEntity();
-
-    /// @brief Add component method
-    /// @details This method is responsible to add a new component to a given entity and it components pool.
-    /// @param entity: The Entity class object to which add the new T type component.
-    /// @param args: The arguments of the Component type class.
-    template <typename TComponent, typename ...TArgs>
-    void AddComponent(Entity entity, TArgs&& ...args);
-
-    /// @brief Remove component method
-    /// @details This method is responsible to remove a component from an entity and it components pool.
-    /// @param entity: The Entity class object to which remove the T type component.
-    template<typename TComponent>
-    void RemoveComponent(Entity entity);
-
-    /// @brief Check component attendance method
-    /// @details This method is responsible for checking the attendance of a component type inside an entity.
-    /// @param entity: The Entity class object to which check the component type attendance.
-    /// @return A boolean value representing the attendance status of the component type inside the given entity.
-    template<typename TComponent>
-    bool HasComponent(Entity entity) const;
 
     /// @brief Add system method
     /// @details This method is responsible to add a new system type to the registry.
@@ -299,7 +295,54 @@ public:
     /// @details This method is responsible for subscribing entity to the different systems that could be interested, regarding the entity components signature.
     /// @param entity: The Entity class object to add to the different systems of the registry.
     void AddEntityToSystems(Entity entity);
+
+    /// @brief Add component method
+    /// @details This method is responsible to add a new component to a given entity and it components pool.
+    /// @param entity: The Entity class object to which add the new T type component.
+    /// @param args: The arguments of the Component type class.
+    template <typename TComponent, typename ...TArgs>
+    void AddComponent(Entity entity, TArgs&& ...args);
+
+    /// @brief Remove component method
+    /// @details This method is responsible to remove a component from an entity and it components pool.
+    /// @param entity: The Entity class object to which remove the T type component.
+    template<typename TComponent>
+    void RemoveComponent(Entity entity);
+
+    /// @brief Check component attendance method
+    /// @details This method is responsible for checking the attendance of a component type inside an entity.
+    /// @param entity: The Entity class object to which check the component type attendance.
+    /// @return A boolean value representing the attendance status of the component type inside the given entity.
+    template<typename TComponent>
+    bool HasComponent(Entity entity) const;
+
+    /// @brief Component getter method
+    /// @details This method is responsible to get the given component type from a given entity components list.
+    /// @param entity: The Entity class object from which getting the component type.
+    /// @return The instance of the found component type class.
+    template<typename TComponent>
+    TComponent& GetComponent(Entity entity) const;
 };
+
+template <typename TComponent, typename ...TArgs>
+void Entity::AddComponent(TArgs&& ...args) {
+    registry->AddComponent<TComponent>(*this, std::forward<TArgs>(args)...);
+}
+
+template <typename TComponent>
+void Entity::RemoveComponent() {
+    registry->RemoveComponent<TComponent>(*this);
+}
+
+template <typename TComponent>
+bool Entity::HasComponent() const {
+    return registry->HasComponent<TComponent>(*this);
+}
+
+template<typename TComponent>
+TComponent& Entity::GetComponent() const {
+    return registry->GetComponent<TComponent>(*this);
+}
 
 template <typename TComponent>
 void System::RequireComponent() {
@@ -320,12 +363,12 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
     // If we still don't have a Pool for that component type
     if (!componentPools[componentId])
     {
-        Pool<TComponent>* newComponentPool = new Pool<TComponent>();
+        std::shared_ptr<Pool<TComponent>> newComponentPool = std::make_shared<Pool<TComponent>>();
         componentPools[componentId] = newComponentPool;
     }
 
     // Get the pool of component values for that component type
-    Pool<TComponent>* componentPool = static_cast<Pool<TComponent>>(componentPools[componentId]);
+    std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
     // If the entity id is greater than the current size of the component pool, then resize the pool
     if (entityId >= componentPool->GetSize()) {
@@ -359,9 +402,19 @@ bool Registry::HasComponent(Entity entity) const {
     return entityComponentSignatures[entityId].test(componentId);
 }
 
+template<typename TComponent>
+TComponent& Registry::GetComponent(Entity entity) const {
+    const auto componentId = Component<TComponent>::GetId();
+    const auto entityId = entity.GetId();
+
+    auto componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+    return componentPool->Get(entityId);
+}
+
 template <typename TSystem, typename ...TArgs>
 void Registry::AddSystem(TArgs&& ...args) {
-    TSystem* newSystem(new TSystem(std::forward<TArgs>(args)...));
+    // Shared smart pointers
+    std::shared_ptr<TSystem> newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
     systems.insert(std::make_pair(std::type_index(typeid(TSystem)), newSystem));
 }
 
