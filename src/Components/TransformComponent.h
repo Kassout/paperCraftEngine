@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-/// Class responsible for holding the data linked to the transform on an entity.
+/// Structure responsible for holding the data linked to the transform on an entity.
 /// @file TransformComponent.h
 /// @author Maxime Héliot
 /// @version 0.1.0 11/10/2021

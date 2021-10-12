@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-/// Class responsible for holding the data linked to the rigid body of the entity.
+/// Structure responsible for holding the data linked to the rigid body of the entity.
 /// @file RigidBodyComponent.h
 /// @author Maxime Héliot
 /// @version 0.1.0 11/10/2021

@@ -1,23 +1,39 @@
 #ifndef MOVEMENTSYSTEM_H
 #define MOVEMENTSYSTEM_H
 
+#include "../ECS/ECS.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/RigidBodyComponent.h"
+
+/// Class responsible to move the entities it is linked to.
+/// @file MovementSystem.h
+/// @author Maxime Héliot
+/// @version 0.1.0 12/10/2021
 class MovementSystem: public System {
 public:
+    /// @brief Default MovementSystem constructor
+    /// @details Base constructor of the MovementSystem class, defining the different required components an entity needs so the system can be interested in.
     MovementSystem() {
-        // TODO:
-        // RequireComponent<TransformComponent>();
-        // RequireComponent<...>();
+        RequireComponent<TransformComponent>();
+        RequireComponent<RigidBodyComponent>();
     }
 
-    void Update() {
-        // TODO:
+    /// @brief System update movement method
+    /// @details This method is responsible for updating the position on all its entities when called.
+    void Update(double deltaTime) {
         // Loop all entities that the system is interested in
-        for (auto entity: GetEntities()) {
-            // TODO: Update entity position based on it's velocity
+        for (auto entity: GetSystemEntities()) {
+            // Update entity position based on it's velocity
+            auto& transform = entity.GetComponent<TransformComponent>();
+            const auto rigidBody = entity.GetComponent<RigidBodyComponent>();
+
+            transform.position.x += rigidBody.velocity.x * deltaTime;
+            transform.position.y += rigidBody.velocity.y * deltaTime;
+
+            // TODO: remove comments
+            Logger::Log("Entity id = " + std::to_string(entity.GetId()) + " position is now (" + std::to_string(transform.position.x) + ", " + std::to_string(transform.position.y) + ")");
         }
     }
-
-
 };
 
 #endif /* MOVEMENTSYSTEM_H */
