@@ -16,7 +16,7 @@ struct TransformComponent {
     glm::vec2 rotation;
 
     /// @brief Default TransformComponent constructor
-    /// @details Base constructor of the TransformComponent class taking base values for the different attributes as parameters.
+    /// @details Base constructor of the TransformComponent class taking base values for the different class attributes as parameters.
     TransformComponent(glm::vec2 position = glm::vec2(0.0, 0.0),
                        glm::vec2 scale = glm::vec2(1.0, 1.0),
                        glm::vec2 rotation = glm::vec2(0.0, 0.0)) :
