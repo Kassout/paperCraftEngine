@@ -2,6 +2,8 @@
 #define COLLISIONSYSTEM_H
 
 #include "../ECS/ECS.h"
+#include "../EventBus/EventBus.h"
+#include "../Events/CollisionEvent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
 
@@ -20,7 +22,7 @@ public:
 
     /// @brief System update collision method
     /// @details This method is responsible for checking entity collisions at any frame of the game and if any, trigger an event.
-    void Update() {
+    void Update(std::unique_ptr<EventBus>& eventBus) {
         auto entities = GetSystemEntities();
 
         // Loop all the entities that the system is interested in
@@ -46,9 +48,7 @@ public:
                                                             bCollider.width, bCollider.height);
 
                 if (collisionHappened) {
-                    Logger::Log("Entity " + std::to_string(a.GetId()) + " is colliding with entity " + std::to_string(b.GetId()));
-
-                    // TODO: emit an event
+                    eventBus->EmitEvent<CollisionEvent>(a, b);
                 }
             }
         }

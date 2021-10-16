@@ -17,7 +17,7 @@ const unsigned int MAX_COMPONENTS = 32;
 /// and also helps keep track of which entities a system is interested in.
 typedef std::bitset<MAX_COMPONENTS> Signature;
 
-/// Structure containing the data representing the base information of a Component object.
+/// Structure interface containing the data representing the base information of a Component object.
 struct IComponent {
 protected:
     /// Integer value representing the id of the next instantiated Component object.

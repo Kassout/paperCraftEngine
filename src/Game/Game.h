@@ -3,6 +3,7 @@
 
 #include "../ECS/ECS.h"
 #include "../AssetStore/AssetStore.h"
+#include "../EventBus/EventBus.h"
 #include <SDL.h>
 
 /// Expected frame per seconds value.
@@ -31,6 +32,8 @@ private:
     std::unique_ptr<Registry> registry; // Registry* registry smart pointer
     /// Asset store of the game.
     std::unique_ptr<AssetStore> assetStore;
+    /// Event bus flow of the game.
+    std::unique_ptr<EventBus> eventBus;
 
 public:
     /// Game window width value.
