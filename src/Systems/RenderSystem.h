@@ -48,8 +48,6 @@ public:
 
             SDL_RenderCopyEx(renderer,
                            assetStore->GetTexture(sprite.assetId), &srcRect, &dstRect, transform.rotation.x, NULL, SDL_FLIP_NONE);
-
-            // TODO: Draw the PNG texture
         }
     }
 };

@@ -19,6 +19,8 @@ class Game {
 private:
     /// Game running status indicator.
     bool isRunning;
+    /// Game debug status indicator.
+    bool isDebug;
     /// Time elapsed since last game frame.
     int millisecsPreviousFrame = 0;
     /// Window object to display render buffers.
