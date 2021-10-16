@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
+#include <deque>
 
 /// Integer value representing the maximum number of components allowed to be setup in an entity.
 const unsigned int MAX_COMPONENTS = 32;
@@ -66,6 +67,10 @@ public:
     /// @details Return the unique id of the Entity.
     /// @return Integer value representing the Entity object id.
     int GetId() const;
+
+    /// @brief Remove the entity
+    /// @details Remove the entity from the game.
+    void Kill();
 
     /// @brief Add component to entity method
     /// @details This method is responsible to add a new component to the entity and it components pool.
@@ -239,10 +244,6 @@ class Registry {
 private:
     /// Integer value representing the number of entity added to the scene.
     int numEntities = 0;
-    /// Set of entity objects awaiting creation in the next Registry update cycle.
-    std::set<Entity> entitiesToBeAdded;
-    /// Set of entity objects awaiting destruction in the next Registry update cycle.
-    std::set<Entity> entitiesToBeKilled;
     /// Vector of component pools. Each pool contains all the data for a certain component type.
     /// @details componentPools[index = component type id]
     /// @details poolObject[index = entity id]
@@ -250,14 +251,24 @@ private:
     /// Vector of component signatures per entity, saying which component is turned "on" for a given entity.
     /// @details entityComponentSignatures[index = entity id]
     std::vector<Signature> entityComponentSignatures;
+    /// Set of entity objects awaiting creation in the next Registry update cycle.
+    std::set<Entity> entitiesToBeAdded;
+    /// Set of entity objects awaiting destruction in the next Registry update cycle.
+    std::set<Entity> entitiesToBeKilled;
     /// Unordered map of active systems.
     /// @details systems[index = system typeid]
     std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
+    /// Double-ended queue containing the ids of the killed entities.
+    std::deque<int> freeIds;
 
 public:
     /// @brief Default constructor
     /// @details A default constructor of the Registry class.
     Registry() = default;
+
+    /// @brief Default destructor
+    /// @details A default constructor of the Registry class.
+    ~Registry() = default;
 
     /// @brief Registry (World objects) update method
     /// @details The registry update method finally processes the entities that are waiting to be added/killed in the scene.
@@ -267,6 +278,21 @@ public:
     /// @details This method is responsible to create a new entity, giving it a new unique id and adding to entities list of the system.
     /// @return The Entity object created by the system.
     Entity CreateEntity();
+
+    /// @brief Remove entity method
+    /// @details This method is responsible to kill an entity, removing it from entities list of the system.
+    /// @param entity: The Entity object to remove from the system.
+    void KillEntity(Entity entity);
+
+    /// @brief Add entity to systems method
+    /// @details This method is responsible for subscribing entity to the different systems that could be interested, regarding the entity components signature.
+    /// @param entity: The Entity class object to add to the different systems of the registry.
+    void AddEntityToSystems(Entity entity);
+
+    /// @brief Remove entity from systems method
+    /// @details This method is responsible for removing entity from the different systems that it was linked to, regarding the entity components signature.
+    /// @param entity: The Entity class object to remove from the different systems of the registry.
+    void RemoveEntityFromSystems(Entity entity);
 
     /// @brief Add system method
     /// @details This method is responsible to add a new system type to the registry.
@@ -290,11 +316,6 @@ public:
     /// @return The instance of the found system type class.
     template<typename TSystem>
     TSystem& GetSystem() const;
-
-    /// @brief Add entity to systems method
-    /// @details This method is responsible for subscribing entity to the different systems that could be interested, regarding the entity components signature.
-    /// @param entity: The Entity class object to add to the different systems of the registry.
-    void AddEntityToSystems(Entity entity);
 
     /// @brief Add component method
     /// @details This method is responsible to add a new component to a given entity and it components pool.
