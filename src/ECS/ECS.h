@@ -72,6 +72,29 @@ public:
     /// @details Remove the entity from the game.
     void Kill();
 
+    // Manage entity tags and groups
+    /// @brief Add tag to entity
+    /// @details This method is responsible to add a given string tag to an entity.
+    /// @param tag: The string tag to rely the entity on.
+    void Tag(const std::string& tag);
+
+    /// @brief Check tag of entity
+    /// @details This method is responsible to check if an entity is linked to a given string tag.
+    /// @param: tag: The string tag to check the entity reliability of.
+    /// @return A boolean value representing the entity reliability status of the given tag.
+    bool HasTag(const std::string& tag) const;
+
+    /// @brief Add group to entity
+    /// @details This method is responsible to add the entity to a given group.
+    /// @param group: The string group to rely the entity on.
+    void Group(const std::string& group);
+
+    /// @brief Check group of entity
+    /// @details This method is responsible to check if an entity is linked to a given group.
+    /// @param: group: The string group to check the entity reliability of.
+    /// @return A boolean value representing the entity reliability status of the given group.
+    bool BelongsToGroup(const std::string& group) const;
+
     /// @brief Add component to entity method
     /// @details This method is responsible to add a new component to the entity and it components pool.
     /// @param args: The arguments of the Component type class.
@@ -251,13 +274,23 @@ private:
     /// Vector of component signatures per entity, saying which component is turned "on" for a given entity.
     /// @details entityComponentSignatures[index = entity id]
     std::vector<Signature> entityComponentSignatures;
+    /// Unordered map of active systems.
+    /// @details systems[index = system typeid]
+    std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
     /// Set of entity objects awaiting creation in the next Registry update cycle.
     std::set<Entity> entitiesToBeAdded;
     /// Set of entity objects awaiting destruction in the next Registry update cycle.
     std::set<Entity> entitiesToBeKilled;
-    /// Unordered map of active systems.
-    /// @details systems[index = system typeid]
-    std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
+    // Entity tags (one tag name per entity)
+    /// Map of entities associated by tag.
+    std::unordered_map<std::string, Entity> entityPerTag;
+    /// Map of tags associated by entity id.
+    std::unordered_map<int, std::string> tagPerEntity;
+    // Entity groups (a set of entities per group name)
+    /// Map of entities associated by group.
+    std::unordered_map<std::string, std::set<Entity>> entitiesPerGroup;
+    /// Map of groups associated by entity.
+    std::unordered_map<int, std::string> groupPerEntity;
     /// Double-ended queue containing the ids of the killed entities.
     std::deque<int> freeIds;
 
@@ -293,6 +326,55 @@ public:
     /// @details This method is responsible for removing entity from the different systems that it was linked to, regarding the entity components signature.
     /// @param entity: The Entity class object to remove from the different systems of the registry.
     void RemoveEntityFromSystems(Entity entity);
+
+    // Tag management
+    /// @brief Add tag to entity
+    /// @details This method is responsible to add a given string tag to the given entity.
+    /// @param entity: Entity object to add the tag on.
+    /// @param tag: String tag to rely the entity on.
+    void TagEntity(Entity entity, const std::string& tag);
+
+    /// @brief Check tag of entity
+    /// @details This method is responsible to check the given entity reliability to a given string tag.
+    /// @param entity: Entity object to check the tag on.
+    /// @param tag: String tag to check for the entity reliability.
+    /// @return Boolean value representing the entity reliability status of the given tag.
+    bool EntityHasTag(Entity entity, const std::string& tag) const;
+
+    /// @brief Get entity by tag
+    /// @details This method is responsible to get the entity associate to the given tag.
+    /// @param tag: String tag associate to an entity.
+    /// @return Entity object associate to the given tag.
+    Entity GetEntityByTag(const std::string& tag) const;
+
+    /// @brief Remove the entity tag
+    /// @details This method is responsible to remove the tag associate to the given entity.
+    /// @param entity: Entity object to remove the tag from.
+    void RemoveEntityTag(Entity entity);
+
+    /// @brief Add group to entity
+    /// @details This method is responsible to add a given string group to the given entity.
+    /// @param entity: Entity object to add the group on.
+    /// @param group: String group to rely the entity on.
+    void GroupEntity(Entity entity, const std::string& group);
+
+    /// @brief Check group of entity
+    /// @details This method is responsible to check the given entity reliability to a given group.
+    /// @param entity: Entity object to check the group on.
+    /// @param group: String tag to check for the entity reliability.
+    /// @return Boolean value representing the entity reliability status of the given group.
+    bool EntityBelongsToGroup(Entity entity, const std::string& group) const;
+
+    /// @brief Get entities by group
+    /// @details This method is responsible to get entities associate to the given group.
+    /// @param group: String group associate to entities.
+    /// @return Vector of entity objects associate to the given group.
+    std::vector<Entity> GetEntitiesByGroup(const std::string& group) const;
+
+    /// @brief Remove the entity group
+    /// @details This method is responsible to remove the group associate to the given entity.
+    /// @param entity: Entity object to remove the group from.
+    void RemoveEntityGroup(Entity entity);
 
     /// @brief Add system method
     /// @details This method is responsible to add a new system type to the registry.

@@ -28,6 +28,8 @@ private:
     SDL_Window* window;
     /// Renderer object to draw texture.
     SDL_Renderer* renderer;
+    /// SDL Rectangle object defining the camera canvas size.
+    SDL_Rect camera;
     /// Registry object of the game.
     std::unique_ptr<Registry> registry; // Registry* registry smart pointer
     /// Asset store of the game.
@@ -37,9 +39,13 @@ private:
 
 public:
     /// Game window width value.
-    int windowWidth;
+    static int windowWidth;
     /// Game window height value.
-    int windowHeight;
+    static int windowHeight;
+    /// Integer value representing the map scene width.
+    static int mapWidth;
+    /// Integer value representing the map scene height.
+    static int mapHeight;
 
     /// @brief Default constructor
     /// @details Base constructor of the Game class.

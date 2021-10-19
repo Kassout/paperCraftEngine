@@ -23,7 +23,7 @@ public:
 
     /// @brief System update render method
     /// @details This method is responsible for updating the render on all its entities when called.
-    void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore) {
+    void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera) {
         // Sort the vector by the z-index value
         std::vector<Entity> layer_sorted_entities = GetSystemEntities();
         std::sort(layer_sorted_entities.begin(), layer_sorted_entities.end(), [](const Entity& a, const Entity& b) -> bool {
@@ -40,8 +40,8 @@ public:
 
             // Set the destination rectangle with the x, y position to be rendered
             SDL_Rect dstRect = {
-                    static_cast<int>(transform.position.x),
-                    static_cast<int>(transform.position.y),
+                    static_cast<int>(transform.position.x - (sprite.isFixed ? 0 : camera.x)),
+                    static_cast<int>(transform.position.y - (sprite.isFixed ? 0 : camera.y)),
                     static_cast<int>(sprite.width * transform.scale.x),
                     static_cast<int>(sprite.height * transform.scale.y)
             };

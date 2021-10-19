@@ -3,6 +3,8 @@
 
 #include "../ECS/ECS.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../Components/ProjectileComponent.h"
+#include "../Components/HealthComponent.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/CollisionEvent.h"
 
@@ -27,9 +29,70 @@ public:
     /// @brief On collision event handler
     /// @details This method is responsible for handling the actions related to an on collision event notification.
     void OnCollision(CollisionEvent& event) {
-        Logger::Log("The damage system received an event collision between entities " + std::to_string(event.a.GetId()) + " and " + std::to_string(event.b.GetId()));
-        event.a.Kill();
-        event.b.Kill();
+        Entity a = event.a;
+        Entity b = event.b;
+
+        if (a.BelongsToGroup("projectiles") && b.HasTag("player")) {
+            OnProjectileHitsPlayer(a, b); // "a" is the projectile, "b" is the player
+        }
+
+        if (b.BelongsToGroup("projectiles") && a.HasTag("player")) {
+            OnProjectileHitsPlayer(b, a); // "b" is the projectile, "a" is the player
+        }
+
+        if (a.BelongsToGroup("projectiles") && b.BelongsToGroup("enemies")) {
+            OnProjectileHitsEnemy(a, b);
+        }
+
+        if (b.BelongsToGroup("projectiles") && a.BelongsToGroup("enemies")) {
+            OnProjectileHitsEnemy(b, a);
+        }
+    }
+
+    /// @brief Action triggered on projectile hits player
+    /// @details This method is responsible for handling the actions related to an on collision event notification between the player and a projectile.
+    /// @param player: The player entity object.
+    /// @param projectile: The projectile entity object.
+    void OnProjectileHitsPlayer(Entity projectile, Entity player) {
+        auto projectileComponent = projectile.GetComponent<ProjectileComponent>();
+
+        if (!projectileComponent.isFriendly) {
+            // Reduce the health of the player by the projectile hitPercentDamage
+            auto health = player.GetComponent<HealthComponent>();
+
+            health.healthPercentage -= projectileComponent.hitPercentDamage;
+
+            // Kills the player when health reaches zero
+            if (health.healthPercentage <= 0) {
+                player.Kill();
+            }
+
+            // Kill the projectile
+            projectile.Kill();
+        }
+    }
+
+    /// @brief Action triggered on projectile hits enemy
+    /// @details This method is responsible for handling the actions related to an on collision event notification between an enemy and a projectile.
+    /// @param enemy: The enemy entity object.
+    /// @param projectile: The projectile entity object.
+    void OnProjectileHitsEnemy(Entity projectile, Entity enemy) {
+        const auto projectileComponent = projectile.GetComponent<ProjectileComponent>();
+
+        if (projectileComponent.isFriendly) {
+            // Reduce the health of the enemy by the projectile hitPercentDamage
+            auto& health = enemy.GetComponent<HealthComponent>();
+
+            health.healthPercentage -= projectileComponent.hitPercentDamage;
+
+            // Kills the enemy when health reaches zero
+            if (health.healthPercentage <= 0) {
+                enemy.Kill();
+            }
+
+            // Kill the projectile
+            projectile.Kill();
+        }
     }
 
     /// @brief System update damage method
