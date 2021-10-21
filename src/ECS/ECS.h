@@ -184,7 +184,11 @@ class IPool {
 public:
     /// @brief Default destructor
     /// @details A default destructor of the IPool class.
-    virtual ~IPool() {}
+    virtual ~IPool() = default;
+    /// @brief Remove entity from pool method
+    /// @details This method is responsible of removing a given entity from the pool object of components.
+    /// @param entityId: Integer value representing the id of the given entity to remove from the pool.
+    virtual void RemoveEntityFromPool(int entityId) = 0;
 };
 
 /// Class responsible for containing objects of type T.
@@ -196,12 +200,23 @@ class Pool: public IPool {
 private:
     /// Vector (contiguous data) of objects of type T.
     std::vector<T> data;
+    /// Integer value representing the pool size of components.
+    int size;
+
+    // Maps to keep track of entity ids per index so the vector is always packed
+    /// Map of entity associated by index;
+    std::unordered_map<int, int> entityIdToIndex;
+    /// Map of index associated to entity;
+    std::unordered_map<int, int> indexToEntityId;
 
 public:
     /// @brief Pool constructor
     /// @details A constructor of the Pool class using a size value parameter.
     /// @param size: An Integer value representing the size of the Pool data vector to instantiate.
-    Pool(int size = 100) { data.resize(size); }
+    Pool(int capacity = 100) {
+        size = 0;
+        data.resize(capacity);
+    }
 
     /// @brief Default destructor
     /// @details A default destructor of the Pool class.
@@ -210,15 +225,15 @@ public:
     /// @brief Pool empty check
     /// @details This method is responsible for checking if the Pool object is empty.
     /// @return The emptiness boolean status of the Pool object.
-    bool isEmpty() const {
-        return data.empty();
+    bool IsEmpty() const {
+        return size == 0;
     }
 
     /// @brief Pool get data vector size
     /// @details This method is responsible for access and return the size of the data vector of the Pool object.
     /// @return An integer value representing the size of the data vector of the Pool object.
     int GetSize() const {
-        return data.size();
+        return size;
     }
 
     /// @brief Pool resize data vector
@@ -232,6 +247,7 @@ public:
     /// @details This method is responsible to clear all the data contained in the Pool object vector.
     void Clear() {
         data.clear();
+        size = 0;
     }
 
     /// @brief Pool vector add data
@@ -245,15 +261,62 @@ public:
     /// @details This method is responsible to access the data contained at a given index of the Pool object vector and, set it to a new data value.
     /// @param index: An integer value representing the index value of the Pool object vector to set the new data value in.
     /// @param object: A "T" class object to add to the Pool object vector at the given index.
-    void Set(int index, T object) {
-        data[index] = object;
+    void Set(int entityId, T object) {
+        if (entityIdToIndex.find(entityId) != entityIdToIndex.end()) {
+            // If the element already exists, simply replace the component object
+            int index = entityIdToIndex[entityId];
+            data[index] = object;
+        } else {
+            // When adding a new object, we keep track of the entity ids and their vector index
+            int index = size;
+            entityIdToIndex.template emplace(entityId, index);
+            indexToEntityId.template emplace(index, entityId);
+            if (index >= data.capacity()) {
+                // If necessary, we resize by always doubling the current capacity
+                data.resize(size * 2);
+            }
+            data[index] = object;
+            size++;
+        }
+    }
+
+    /// @brief Remove entity from pool
+    /// @details This method is responsible to remove the given entity from the pool object of components.
+    /// @param entityId: Integer value representing the id of the given entity to remove from the pool.
+    void Remove(int entityId) {
+        // Copy the last element to the deleted position to keep the array packed
+        int indexOfRemoved = entityIdToIndex[entityId];
+        int indexOfLast = size - 1;
+        data[indexOfRemoved] = data[indexOfLast];
+
+        // Update the index-entity maps to point to the correct elements
+        int entityIdOfLastElement = indexToEntityId[indexOfLast];
+        entityIdToIndex[entityIdOfLastElement] = indexOfRemoved;
+        indexToEntityId[indexOfRemoved] = entityIdOfLastElement;
+
+        entityIdToIndex.erase(entityId);
+        indexToEntityId.erase(indexOfLast);
+
+        size--;
+    }
+
+    /// @brief Remove entity from pool
+    /// @details This method is responsible to remove the given entity from the pool object of components.
+    /// @param entityId: Integer value representing the id of the given entity to remove from the pool.
+    void RemoveEntityFromPool(int entityId) override {
+        if (entityIdToIndex.find(entityId) != entityIdToIndex.end()) {
+            Remove(entityId);
+        }
     }
 
     /// @brief Pool vector get data
     /// @details This method is responsible to access the data contained at a given index of the Pool object vector.
     /// @param index: An integer value representing the index value of the Pool object vector to access.
     /// @return A "T" class object contained at the given index of the Pool object vector.
-    T& Get(int index) { return static_cast<T&>(data[index]); }
+    T& Get(int entityId) {
+        int index = entityIdToIndex[entityId];
+        return static_cast<T&>(data[index]);
+    }
 
     /// @brief Subscript operator overloading
     T& operator [](unsigned int index) { return data[index]; }
@@ -473,11 +536,6 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
     // Get the pool of component values for that component type
     std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
-    // If the entity id is greater than the current size of the component pool, then resize the pool
-    if (entityId >= componentPool->GetSize()) {
-            componentPool->Resize(numEntities);
-    }
-
     // Create a new Component object of the type T, and forward the various parameters to the constructor
     // use "forward" to pass all the arguments of the T component sub-class to the constructor of that same sub-class
     TComponent newComponent(std::forward<TArgs>(args)...);
@@ -494,6 +552,11 @@ void Registry::RemoveComponent(Entity entity) {
     const auto componentId = Component<TComponent>::GetId();
     const auto entityId = entity.GetId();
 
+    // Get the pool of component values for that component type
+    std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+    componentPool->Remove(entityId);
+
+    // Set this component signature for that entity to false
     entityComponentSignatures[entityId].set(componentId, false);
 }
 
