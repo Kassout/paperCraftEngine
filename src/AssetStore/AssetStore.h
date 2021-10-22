@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 /// Class responsible for managing all type of assets and store them.
 /// @file AssetStore.h
@@ -13,7 +14,8 @@ class AssetStore {
 private:
     /// A map of the different game sprites - textures
     std::map<std::string, SDL_Texture*> textures;
-    // TODO: create a map for fonts
+    // A map of the different game fonts
+    std::map<std::string, TTF_Font*> fonts;
     // TODO: create a map for audio
 
 public:
@@ -36,6 +38,14 @@ public:
     /// @brief Texture asset getter by id
     /// @details This method is responsible for returning the texture associated to a given id in the texture assets map.
     SDL_Texture* GetTexture(const std::string& assetId);
+
+    /// @brief Add font type asset
+    /// @details This method is responsible for adding a font to the asset store.
+    void AddFont(const std::string& assetId, const std::string& filePath, int fontSize);
+
+    /// @brief Font asset getter by id
+    /// @details This method is responsible for returning the font associated to a given id in the font assets map.
+    TTF_Font* GetFont(const std::string& assetId);
 };
 
 #endif // ASSETSTORE_H //

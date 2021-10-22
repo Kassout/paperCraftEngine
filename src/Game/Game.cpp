@@ -20,6 +20,9 @@
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/ProjectileLifeCycleSystem.h"
+#include "../Components/TextLabelComponent.h"
+#include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderHealthBarSystem.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
@@ -51,12 +54,17 @@ void Game::Initialize() {
         return;
     }
 
+    if (TTF_Init() != 0) {
+        Logger::Err("Error initializing SDL TTF.");
+        return;
+    }
+
     SDL_DisplayMode displayMode;
     // use reference to get the memory address of the struct
     // the method will populate the value inside the struct
     SDL_GetCurrentDisplayMode(0, &displayMode);
-    windowWidth = 1920;
-    windowHeight = 1080;
+    windowWidth = displayMode.w;
+    windowHeight = displayMode.h;
 
     // SDL_Window* -> Pointer to a struct
     // window -> pointer to a memory address where the struct is located
@@ -123,6 +131,8 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<CameraMovementSystem>();
     registry->AddSystem<ProjectileEmitSystem>();
     registry->AddSystem<ProjectileLifeCycleSystem>();
+    registry->AddSystem<RenderTextSystem>();
+    registry->AddSystem<RenderHealthBarSystem>();
 
     // Adding assets to the asset store
     assetStore->AddTexture(renderer, "tank-image", "./../assets/images/tank-panther-right.png");
@@ -131,6 +141,9 @@ void Game::LoadLevel(int level) {
     assetStore->AddTexture(renderer, "radar-image", "./../assets/images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "./../assets/tilemaps/jungle.png");
     assetStore->AddTexture(renderer, "bullet-image", "./../assets/images/bullet.png");
+    assetStore->AddFont("charriot-font", "./../assets/fonts/charriot.ttf", 20);
+    assetStore->AddFont("pico8-font-5", "./../assets/fonts/pico8.ttf", 5);
+    assetStore->AddFont("pico8-font-10", "./../assets/fonts/pico8.ttf", 10);
 
     // Load the tilemap
     int tileSize = 32;
@@ -199,6 +212,10 @@ void Game::LoadLevel(int level) {
     truck.AddComponent<BoxColliderComponent>(32, 32);
     truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 10, false);
     truck.AddComponent<HealthComponent>(100);
+
+    Entity label = registry->CreateEntity();
+    SDL_Color green = {0, 255, 0};
+    label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 10), "CHOPPER 1.0", "charriot-font", green, true);
 }
 
 void Game::Setup() {
@@ -245,6 +262,8 @@ void Game::Render() {
 
     // Invoke all the systems that need to render
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
     }
