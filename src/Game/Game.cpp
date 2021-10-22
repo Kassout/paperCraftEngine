@@ -23,9 +23,13 @@
 #include "../Components/TextLabelComponent.h"
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/RenderHealthBarSystem.h"
+#include "../Systems/RenderGUISystem.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h>
+#include <imgui/imgui_impl_sdl.h>
 #include <iostream>
 #include <fstream>
 
@@ -75,12 +79,16 @@ void Game::Initialize() {
         return;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
     {
         Logger::Err("Error creating SDL rederer.");
         return;
     }
+
+    // Initialize the ImGui context
+    ImGui::CreateContext();
+    ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
 
     // Change video mode to real fullscreen
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
@@ -99,6 +107,18 @@ void Game::ProcessInput() {
     // &sdlEvent -> reference of the sdlEvent struct.
     while(SDL_PollEvent(&sdlEvent))
     {
+        // ImGui SDL input
+        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+        ImGuiIO& io = ImGui::GetIO();
+
+        int mouseX, mouseY;
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+        io.MousePos = ImVec2(mouseX, mouseY);
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+
+        // Handle core SDL events (close window, key pressed, etc.)
         switch (sdlEvent.type) {
             // Event of closing the window;
             case SDL_QUIT:
@@ -133,6 +153,7 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<ProjectileLifeCycleSystem>();
     registry->AddSystem<RenderTextSystem>();
     registry->AddSystem<RenderHealthBarSystem>();
+    registry->AddSystem<RenderGUISystem>();
 
     // Adding assets to the asset store
     assetStore->AddTexture(renderer, "tank-image", "./../assets/images/tank-panther-right.png");
@@ -266,6 +287,7 @@ void Game::Render() {
     registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        registry->GetSystem<RenderGUISystem>().Update();
     }
 
     SDL_RenderPresent(renderer);
@@ -282,6 +304,8 @@ void Game::Run() {
 }
 
 void Game::Destroy() {
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

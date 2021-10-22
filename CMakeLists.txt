@@ -34,9 +34,6 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
-#set(INCLUDES src/Game.h)
-#set(SOURCES src/Main.cpp)
-
 file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
         )
@@ -44,6 +41,7 @@ file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+        libs/imgui/*.cpp
         )
 
 add_executable(paperCraftEngine ${HEADER_FILES} ${SRC_FILES})
