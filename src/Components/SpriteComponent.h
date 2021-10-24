@@ -16,6 +16,8 @@ struct SpriteComponent {
     int height;
     /// Integer value representing the sorting z layer index to render the sprite on.
     int layerIndex;
+    /// TODO: comments
+    SDL_RendererFlip flip;
     /// Boolean value representing the sprite fixed position status of the entity.
     bool isFixed;
     /// SDL_Rect object representing the definition of the rectangle containing the sprite to render.
@@ -26,6 +28,7 @@ struct SpriteComponent {
     SpriteComponent(std::string assetId = "", int width = 0, int height = 0, int layerIndex = 0, bool isFixed = false, int srcRectX = 0, int srcRectY = 0) :
     assetId(assetId), width(width), height(height), layerIndex(layerIndex), isFixed(isFixed) {
         this->srcRect = {srcRectX, srcRectY, width, height};
+        this->flip = SDL_FLIP_NONE;
     }
 };
 

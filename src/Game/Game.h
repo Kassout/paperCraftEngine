@@ -5,6 +5,7 @@
 #include "../AssetStore/AssetStore.h"
 #include "../EventBus/EventBus.h"
 #include <SDL.h>
+#include <sol/sol.hpp>
 
 /// Expected frame per seconds value.
 const int FPS = 60;
@@ -30,6 +31,8 @@ private:
     SDL_Renderer* renderer;
     /// SDL Rectangle object defining the camera canvas size.
     SDL_Rect camera;
+    /// TODO: comments
+    sol::state lua;
     /// Registry object of the game.
     std::unique_ptr<Registry> registry; // Registry* registry smart pointer
     /// Asset store of the game.
@@ -66,11 +69,6 @@ public:
     /// @brief Game setup method
     /// @details This method is responsible for building the different static and default elements of the game at run.
     void Setup();
-
-    /// @brief Game load level method
-    /// @details This method is responsible for loading the different element constituting of the targeted level.
-    /// @param level: Integer value representing the index of the level scene to load.
-    void LoadLevel(int level);
 
     /// @brief Game process input method
     /// @details This method is responsible for building the different static and default elements of the game at run.

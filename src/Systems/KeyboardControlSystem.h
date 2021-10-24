@@ -56,12 +56,6 @@ public:
             }
         }
     }
-
-    /// @brief System update control method
-    /// @details This method is responsible for managing entity controls received at any frame of the game.
-    void Update() {
-        // TODO: ...
-    }
 };
 
 #endif // KEYBOARDMOVEMENTSYSTEM_H //

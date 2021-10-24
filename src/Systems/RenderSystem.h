@@ -24,16 +24,42 @@ public:
     /// @brief System update render method
     /// @details This method is responsible for updating the render on all its entities when called.
     void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera) {
+        // Create a vector with both Sprite and Transform component of all entities
+        struct RenderableEntity {
+            TransformComponent transformComponent;
+            SpriteComponent spriteComponent;
+        };
+        std::vector<RenderableEntity> renderableEntities;
+        for (auto entity: GetSystemEntities()) {
+            RenderableEntity renderableEntity;
+            renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
+            renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
+
+            // Bypass rendering entities if they're outside the camera view
+            bool isEntityOutsideCameraView = (
+                    renderableEntity.transformComponent.position.x + (renderableEntity.spriteComponent.width * renderableEntity.transformComponent.scale.x) < camera.x ||
+                    renderableEntity.transformComponent.position.x > camera.x + camera.w ||
+                    renderableEntity.transformComponent.position.y + (renderableEntity.spriteComponent.height * renderableEntity.transformComponent.scale.y) < camera.y ||
+                    renderableEntity.transformComponent.position.y > camera.y + camera.h
+                    );
+
+            // Cull sprites that are outside the camera view (and are not fixed)
+            if (isEntityOutsideCameraView && !renderableEntity.spriteComponent.isFixed) {
+                continue;
+            }
+
+            renderableEntities.emplace_back(renderableEntity);
+        }
+
         // Sort the vector by the z-index value
-        std::vector<Entity> layer_sorted_entities = GetSystemEntities();
-        std::sort(layer_sorted_entities.begin(), layer_sorted_entities.end(), [](const Entity& a, const Entity& b) -> bool {
-            return a.GetComponent<SpriteComponent>().layerIndex < b.GetComponent<SpriteComponent>().layerIndex;
+        std::sort(renderableEntities.begin(), renderableEntities.end(), [](const RenderableEntity& a, const RenderableEntity& b) -> bool {
+            return a.spriteComponent.layerIndex < b.spriteComponent.layerIndex;
         });
 
         // Loop all entities that the system is interested in
-        for (auto entity: GetSystemEntities()) {
-            const auto transform = entity.GetComponent<TransformComponent>();
-            const auto sprite = entity.GetComponent<SpriteComponent>();
+        for (auto entity: renderableEntities) {
+            const auto transform = entity.transformComponent;
+            const auto sprite = entity.spriteComponent;
 
             // Set the source rectangle of our original sprite texture
             SDL_Rect srcRect = sprite.srcRect;
@@ -47,7 +73,7 @@ public:
             };
 
             SDL_RenderCopyEx(renderer,
-                           assetStore->GetTexture(sprite.assetId), &srcRect, &dstRect, transform.rotation.x, NULL, SDL_FLIP_NONE);
+                           assetStore->GetTexture(sprite.assetId), &srcRect, &dstRect, transform.rotation.x, NULL, sprite.flip);
         }
     }
 };

@@ -94,12 +94,6 @@ public:
             projectile.Kill();
         }
     }
-
-    /// @brief System update damage method
-    /// @details This method is responsible for managing entity health and damage received at any frame of the game.
-    void Update() {
-        // TODO: ...
-    }
 };
 
 #endif /* DAMAGESYSTEM_H */

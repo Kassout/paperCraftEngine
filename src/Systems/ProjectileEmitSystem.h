@@ -10,6 +10,7 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/ProjectileComponent.h"
+#include "../Components/CameraFollowComponent.h"
 #include <SDL.h>
 
 /// Class responsible to manage projectile emitter entities behaviour.
@@ -63,9 +64,9 @@ public:
                     // Create new projectile entity and add it to the world
                     Entity projectile = entity.registry->CreateEntity();
                     projectile.Group("projectiles");
-                    projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), glm::vec2(0));
+                    projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), glm::vec2(0, 0));
                     projectile.AddComponent<RigidBodyComponent>(projectileVelocity);
-                    projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
+                    projectile.AddComponent<SpriteComponent>("bullet-texture", 4, 4, 4);
                     projectile.AddComponent<BoxColliderComponent>(4, 4);
                     projectile.AddComponent<ProjectileComponent>(projectileEmitter.isFriendly, projectileEmitter.hitPercentDamage, projectileEmitter.projectileDuration);
 
@@ -98,9 +99,9 @@ public:
                 // Add a new projectile entity to the game scene
                 Entity projectile = registry->CreateEntity();
                 projectile.Group("projectiles");
-                projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), glm::vec2(0));
+                projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), glm::vec2(0, 0));
                 projectile.AddComponent<RigidBodyComponent>(projectileEmitter.projectileVelocity);
-                projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
+                projectile.AddComponent<SpriteComponent>("bullet-texture", 4, 4, 4);
                 projectile.AddComponent<BoxColliderComponent>(4, 4);
                 projectile.AddComponent<ProjectileComponent>(projectileEmitter.isFriendly, projectileEmitter.hitPercentDamage, projectileEmitter.projectileDuration);
 
