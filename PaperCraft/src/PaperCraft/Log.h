@@ -2,19 +2,32 @@
 
 #include "Core.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 
 namespace PaperCraft
 {
+	/*
+	* Class used to manage PaperCraft core and client log message notifications.
+	*/
 	class PAPERCRAFT_API Log
 	{
 	public:
+		/*
+		* This function is responsible for initializing PaperCraft log manager class.
+		*/
 		static void Init();
 
+		// PaperCraft core logger getter.
 		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+
+		// PaperCraft client logger getter.
 		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
 
 	private:
+		// PaperCraft core logger reference variable.
 		static std::shared_ptr<spdlog::logger> s_CoreLogger;
+
+		// PaperCraft client logger reference variable.
 		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 	};
 }

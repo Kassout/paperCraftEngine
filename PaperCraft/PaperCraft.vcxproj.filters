@@ -4,6 +4,9 @@
     <Filter Include="PaperCraft">
       <UniqueIdentifier>{6DD49166-598C-D3B3-C293-AC0FAE6A6EA4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PaperCraft\Events">
+      <UniqueIdentifier>{B1A33821-1DBA-36B7-6631-C2D8D286073F}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PaperCraft.h" />
@@ -15,6 +18,18 @@
     </ClInclude>
     <ClInclude Include="src\PaperCraft\EntryPoint.h">
       <Filter>PaperCraft</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PaperCraft\Events\ApplicationEvent.h">
+      <Filter>PaperCraft\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PaperCraft\Events\Event.h">
+      <Filter>PaperCraft\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PaperCraft\Events\KeyEvent.h">
+      <Filter>PaperCraft\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PaperCraft\Events\MouseEvent.h">
+      <Filter>PaperCraft\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\PaperCraft\Log.h">
       <Filter>PaperCraft</Filter>
